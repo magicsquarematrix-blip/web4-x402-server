@@ -67,6 +67,7 @@ export class AutonomousFlashLoanListener {
       liveTxHashesCount: this.liveTxHashes.length,
       liveTxHashes: this.liveTxHashes,
       botExecutionWallet: "0xF2208d857a843A50340465a31899AE3E8eB694b2",
+      deployedContractAddress: process.env.CONTRACT_ADDRESS || "0xc5807BdC47795e70885274862F3EdF9F8D946561",
       recipientProfitWallet: "0x28303fC91d93463BcAb1611aDdC2056A490DE9BB",
       timestamp: new Date().toISOString()
     };
@@ -77,9 +78,9 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 const listener = new AutonomousFlashLoanListener({
-  pollIntervalMs: 5000,
-  minNetProfitUsd: 5.0,
-  borrowCapitalUsd: 10000,
+  pollIntervalMs: 3000,
+  minNetProfitUsd: 1.0,
+  borrowCapitalUsd: 1000,
   targetTokens: [
     "0x4200000000000000000000000000000000000006",
     "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"

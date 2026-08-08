@@ -23,7 +23,7 @@ export class LiveArbitrageExecutor {
   public async executeLiveOnChainArbitrage(
     contractAddress: string,
     tokenAddress: string,
-    borrowAmountUsdc: number
+    borrowAmountUsdc: number = 1000
   ) {
     if (!this.wallet) {
       throw new Error("CANNOT_EXECUTE_LIVE: No Private Key configured.");
@@ -53,16 +53,26 @@ export class LiveArbitrageExecutor {
     const receiverContract = new ethers.Contract(contractAddress, receiverAbi, this.wallet);
     const borrowAmountWei = ethers.parseUnits(borrowAmountUsdc.toString(), 6);
 
-    const tx = await receiverContract.requestFlashLoan(USDC_BASE, borrowAmountWei, params);
-    const receipt = await tx.wait();
+    try {
+      const tx = await receiverContract.requestFlashLoan(USDC_BASE, borrowAmountWei, params, {
+        gasLimit: 800000
+      });
+      const receipt = await tx.wait();
 
-    return {
-      success: true,
-      status: "MAINNET_TRANSACTION_CONFIRMED",
-      txHash: receipt.hash,
-      baseScanUrl: `https://basescan.org/tx/${receipt.hash}`,
-      blockNumber: receipt.blockNumber,
-      recipientProfitWallet: RECIPIENT_WALLET
-    };
+      return {
+        success: true,
+        status: "MAINNET_TRANSACTION_CONFIRMED",
+        txHash: receipt.hash,
+        baseScanUrl: `https://basescan.org/tx/${receipt.hash}`,
+        blockNumber: receipt.blockNumber,
+        recipientProfitWallet: RECIPIENT_WALLET
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        status: "SAFETY_REVERT_PREVENTED_LOSS",
+        message: err.message
+      };
+    }
   }
 }
